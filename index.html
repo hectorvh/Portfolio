@@ -290,11 +290,11 @@ body.pulse .dhead h2{text-shadow:2px 0 rgba(255,60,40,.7),-2px 0 rgba(0,229,255,
   #diag{display:block;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto;top:calc(136px + env(safe-area-inset-top,0px));bottom:auto}
   #diag[hidden]{display:none!important}
   #dossier{
-    top:auto;bottom:0;left:0;right:0;width:auto;max-height:none;height:min(78%,640px);
-    border:0;border-top:1px solid var(--cyan-dim);box-shadow:0 -20px 60px rgba(0,0,0,.5);
-    opacity:1;transform:translateY(105%);
+    top:0;bottom:0;left:0;right:0;width:100%;max-height:none;height:100%;z-index:8;
+    border:0;border-radius:0;box-shadow:none;
+    opacity:1;transform:translateY(100%);
     transition:transform .45s cubic-bezier(.2,.8,.2,1),visibility 0s linear .45s;
-    padding-bottom:env(safe-area-inset-bottom,0px);
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
   }
   #dossier.open{transform:none;transition:transform .45s cubic-bezier(.2,.8,.2,1),visibility 0s}
   #dossier::before{left:24px;top:-1px;width:64px;height:3px}
@@ -1948,11 +1948,14 @@ function layout(){
   panelW = narrow?0:parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--panel-w"))||0;
   camera.aspect=W/H;
   if(narrow){
-    camera.fov=46; camDir.set(0,.62,1).normalize(); camTarget.set(0,-.2,0);
+    zoomTarget=1;
+    camera.fov=46; camDir.set(0,.62,1).normalize(); camTarget.set(0,-.15,0);
     const tH=Math.tan(camera.fov*Math.PI/360);
-    const dh=3.05/(tH*camera.aspect), dv=4.9/tH;
-    camDist=Math.max(dh,dv*.8);
-    camera.setViewOffset(W,H,0,-H*.035,W,H);
+    const foot=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--foot-h"))||36;
+    const usable=Math.max(.62,(H-foot-28)/H);
+    const dh=3.15/(tH*camera.aspect), dv=5.55/(tH*usable);
+    camDist=Math.max(dh,dv,8.5);
+    camera.setViewOffset(W,H,0,foot*.55,W,H);
   }else{
     camera.fov=36; camDir.set(0,.36,1).normalize(); camTarget.set(0,-.25,0);
     const tH=Math.tan(camera.fov*Math.PI/360), regionHalf=(W-panelW)/2-30;
@@ -2032,7 +2035,7 @@ function endDrag(e){
       if(mod(proj,N)!==secIdx) latch(true);
       commit(proj);
     }
-  }else if(tap){
+  }else if(tap && !isNarrow()){
     zoomTarget = zoomTarget===1 ? .78 : 1; latch(false);
   }
   drag=null; canvas.classList.remove("dragging");
