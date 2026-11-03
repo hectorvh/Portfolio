@@ -1925,46 +1925,51 @@ const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
 function pick(x,y,objs){ ndc.set(x/W*2-1,-(y/H)*2+1); ray.setFromCamera(ndc,camera); return ray.intersectObjects(objs,false)[0]; }
 const segMeshes=segs.map(s=>s.mesh);
 
-let wheelAcc=0,wheelLast=0,wheelIdle=0;
+let wheelAcc=0,wheelLast=0,wheelIdle=0,wheelSteps=0;
 canvas.addEventListener("wheel",e=>{
   e.preventDefault(); setInput("kb");
   const dy=(e.deltaMode===1?e.deltaY*30:e.deltaY)+(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:0);
-  wheelAcc+=dy; clearTimeout(wheelIdle); wheelIdle=setTimeout(()=>wheelAcc=0,220);
+  wheelAcc+=dy; clearTimeout(wheelIdle); wheelIdle=setTimeout(()=>{ wheelAcc=0; wheelSteps=0; },320);
   const now=performance.now();
-  if(Math.abs(wheelAcc)>55 && now-wheelLast>210){ step(Math.sign(wheelAcc)); wheelAcc=0; wheelLast=now; }
+  if(wheelSteps<1 && Math.abs(wheelAcc)>55 && now-wheelLast>210){ step(Math.sign(wheelAcc)); wheelAcc=0; wheelLast=now; wheelSteps++; }
 },{passive:false});
 
 let drag=null;
 const orbit={rx:0,ry:0,vx:0,vy:0,auto:.18};
 canvas.addEventListener("pointerdown",e=>{
-  canvas.setPointerCapture(e.pointerId); ensureAudio();
+  if(e.pointerType==="touch") e.preventDefault();
+  try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+  ensureAudio();
   if(e.pointerType==="touch") setInput("touch"); else if(inputMode==="touch") setInput("kb");
   const onCore=!!pick(e.clientX,e.clientY,[coreHit]);
   const seg=pick(e.clientX,e.clientY,segMeshes);
+  const touch=e.pointerType==="touch";
   drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,t:performance.now(),moved:0,
-    mode:(onCore&&!seg)?"orbit":"dial",startPos:dial.pos,seg:seg?seg.object.userData.index:-1,vel:0,lastLatch:Math.round(dial.pos)};
+    mode:(touch||!(onCore&&!seg))?"dial":"orbit",startPos:dial.pos,seg:seg?seg.object.userData.index:-1,vel:0,lastLatch:Math.round(dial.pos)};
   if(drag.mode==="dial"){ dial.dragging=true; dial.vel=0; }
   canvas.classList.add("dragging");
 });
 canvas.addEventListener("pointermove",e=>{
-  if(!drag){
+  if(!drag || e.pointerId!==drag.id){
+    if(drag) return;
     const over=!!pick(e.clientX,e.clientY,[coreHit]) && !pick(e.clientX,e.clientY,segMeshes);
     canvas.classList.toggle("over-core",over); return;
   }
+  if(e.pointerType==="touch") e.preventDefault();
   const dx=e.clientX-drag.x, dy=e.clientY-drag.y, now=performance.now(), dt=Math.max(1,now-drag.t);
   drag.moved+=Math.abs(dx)+Math.abs(dy);
   if(drag.mode==="orbit"){
     orbit.ry+=dx*.008; orbit.rx=clamp(orbit.rx+dy*.006,-.7,.7); orbit.vy=dx*.008/(dt/16); orbit.vx=dy*.006/(dt/16);
   }else{
-    const pps=clamp(W*.16,90,220);
-    dial.pos=drag.startPos-(e.clientX-drag.x0)/pps;
-    drag.vel=-dx/pps/(dt/1000);
+    const pps=clamp(W*.28,140,320);
+    const base=Math.round(drag.startPos);
+    dial.pos=clamp(drag.startPos-(e.clientX-drag.x0)/pps, base-1, base+1);
     const r=Math.round(dial.pos); if(r!==drag.lastLatch){ drag.lastLatch=r; latch(false); window.__labels.refresh(); }
   }
   drag.x=e.clientX; drag.y=e.clientY; drag.t=now;
 });
 function endDrag(e){
-  if(!drag) return;
+  if(!drag || (e&&e.pointerId!==drag.id)) return;
   const tap=drag.moved<8;
   if(drag.mode==="dial"){
     dial.dragging=false;
@@ -1972,7 +1977,7 @@ function endDrag(e){
       if(drag.seg>=0){ if(drag.seg===secIdx) { latch(false); openDossier(); } else goTo(drag.seg); }
     }else{
       const base=Math.round(drag.startPos);
-      const proj=clamp(Math.round(dial.pos+clamp(drag.vel,-12,12)*.12),base-3,base+3);
+      const proj=clamp(Math.round(dial.pos), base-1, base+1);
       if(mod(proj,N)!==secIdx) latch(true);
       commit(proj);
     }
@@ -2033,7 +2038,7 @@ const anchors={
   tri:{el:$("tagTri"),p:new THREE.Vector3(-2.6,2.0,-.2),dx:-160,dy:-10,desk:true},
   sel:{el:$("tagSel"),p:new THREE.Vector3(1.9,2.55,-.4),dx:0,dy:-40,desk:false}
 };
-const tmpV=new THREE.Vector3(), tmpV2=new THREE.Vector3();
+const tmpV=new THREE.Vector3();
 function placeTags(){
   const narrow=isNarrow();
   for(const k in anchors){
@@ -2041,28 +2046,11 @@ function placeTags(){
     if(narrow&&a.desk){ a.el.style.display="none"; continue; }
     a.el.style.display="";
     if(narrow&&k==="sel"){
-      tmpV.set(0,CORE_Y,0).project(camera);
-      const cx=(tmpV.x+1)/2*W, cy=(1-tmpV.y)/2*H;
-      tmpV2.set(CORE_R*1.35,CORE_Y,0).project(camera);
-      const rx=Math.max(1,Math.abs((tmpV2.x+1)/2*W-cx));
-      tmpV2.set(0,CORE_Y+CORE_R*1.35,0).project(camera);
-      const ry=Math.max(1,Math.abs(cy-(1-tmpV2.y)/2*H));
       const w=a.el.offsetWidth||160, h=a.el.offsetHeight||64;
       const margin=8;
-      const header=Math.max(92,($("ident").getBoundingClientRect().bottom||88)+8);
-      const foot=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--foot-h"))||36;
-      const outside=(x,y)=>[[x+1,y+2],[x+1,y+h/2],[x+1,y+h-2],[x+w*.3,y+h*.7]].every(([px,py])=>{
-        const nx=(px-cx)/rx, ny=(py-cy)/ry; return nx*nx+ny*ny>=1;
-      });
+      const top=Math.max($("ident").getBoundingClientRect().bottom, $("links").getBoundingClientRect().bottom)+10;
       const x=W-w-margin;
-      let y=header, best=header, found=false;
-      const yMax=H-h-foot-12;
-      for(let yy=header; yy<=yMax; yy+=4){
-        if(outside(x,yy)){ best=yy; found=true; }
-        else if(found) break;
-      }
-      /* extra lift: the projected limb is inside the visible shell */
-      y=found?Math.max(header,best-36):clamp(cy-ry-h-8, header, yMax);
+      const y=Math.min(top, H-h-12);
       a.el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;
       continue;
     }
