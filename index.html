@@ -767,7 +767,7 @@ function onSection(){
   if(window.__labels) window.__labels.refresh();
   portraitGen++;
 }
-/* About Me or Contact, selected but closed: icons yield to the portrait, then return. Whole pass is 5.4s (40% quicker than the 9s rhythm). */
+/* About Me or Contact, selected but closed: icons yield to the portrait, then return. A pass that has started runs to the end even if another section is selected. Whole pass is 5.4s (40% quicker than the 9s rhythm). */
 let portraitGen=1, portraitT=-1, portraitRun=0, portraitPx=43;
 function fitPortrait(){
   const links=$("links"), box=links.getBoundingClientRect(), gap=14;
@@ -796,19 +796,21 @@ function syncPortrait(dt){
   const links=$("links");
   const frame=links.querySelector(".portrait-frame");
   const portraitSec=SECTIONS[secIdx].id==="about"||SECTIONS[secIdx].id==="contact";
-  const show=portraitSec && !$("dossier").classList.contains("open") && !reduce;
-  if(show&&frame){
+  const dossierOpen=$("dossier").classList.contains("open");
+  const show=portraitSec && !dossierOpen && !reduce;
+  const set=(iR,iL,pR,pL)=>{ links.style.setProperty("--iR",iR+"%"); links.style.setProperty("--iL",iL+"%"); links.style.setProperty("--pR",pR+"%"); links.style.setProperty("--pL",pL+"%"); };
+  if(show && portraitT<0 && portraitRun!==portraitGen){ portraitRun=portraitGen; portraitT=0; }
+  const playing=portraitT>=0;
+  if((show||playing)&&frame){
     portraitPx+=(fitPortrait()-portraitPx)*Math.min(1, dt*8);
     frame.style.width=frame.style.height=portraitPx.toFixed(1)+"px";
   }
-  const set=(iR,iL,pR,pL)=>{ links.style.setProperty("--iR",iR+"%"); links.style.setProperty("--iL",iL+"%"); links.style.setProperty("--pR",pR+"%"); links.style.setProperty("--pL",pL+"%"); };
-  if(show && portraitRun!==portraitGen){ portraitRun=portraitGen; portraitT=0; }
-  if(!show){
+  if(dossierOpen && portraitSec){
     portraitT=-1; links.classList.remove("busy"); set(0,0,0,100);
-    if($("dossier").classList.contains("open") && portraitSec) portraitRun=-1;
+    portraitRun=-1;
     return;
   }
-  if(portraitT<0){ links.classList.remove("busy"); set(0,0,0,100); return; }
+  if(!playing){ links.classList.remove("busy"); set(0,0,0,100); return; }
   portraitT+=dt;
   const ramp=(a,b)=>clamp((portraitT-a)/(b-a),0,1), sm=t=>t*t*(3-2*t);
   const k=0.6; /* 40% quicker than the 9s pass */
@@ -1221,7 +1223,7 @@ const space=(function(){
     const trail=new THREE.Line(tg,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
     trail.frustumCulled=false; sc.add(trail); sc.add(root);
     const col=new THREE.Color(spec.col);
-    const sh={kind,root,body,trail,tp,tc,col,spec,nav,vel:new THREE.Vector3(),wait:0.35+ships.length*1.15+Math.random()*.4,alive:false,t:0,bank:Math.random()*6,hist:[]};
+    const sh={kind,root,body,trail,tp,tc,col,spec,nav,vel:new THREE.Vector3(),wait:0,alive:false,t:0,bank:Math.random()*6,hist:[]};
     root.visible=false; trail.visible=false; ships.push(sh); return sh;
   }
   ["dart","wing","hauler","dart","wing"].forEach(makeShip);
@@ -1250,16 +1252,18 @@ const space=(function(){
     sh.root.position.copy(a); sh.vel.subVectors(b,a).normalize().multiplyScalar(sp); sh.dur=a.distanceTo(b)/sp;
     sh.t=0; sh.alive=true; sh.root.visible=true; sh.trail.visible=true; sh.hist.length=0;
     sh.root.lookAt(tmp.copy(a).add(sh.vel));
-    /* wingman: a dart sometimes follows another dart */
-    const mate=shipCap>1&&ships.find(o=>o!==sh&&ships.indexOf(o)<shipCap&&o.kind===sh.kind&&!o.alive&&o.kind!=="hauler");
-    if(mate&&Math.random()<.5){ mate.alive=true; mate.wait=0; mate.root.visible=true; mate.trail.visible=true; mate.hist.length=0;
-      mate.root.position.copy(a).add(tmp.set(8*SHIP_SCALE,3*SHIP_SCALE,-14*SHIP_SCALE).applyQuaternion(sh.root.quaternion)); mate.vel.copy(sh.vel); mate.dur=sh.dur; mate.t=0; mate.root.quaternion.copy(sh.root.quaternion); }
   }
+  const ROTATION=["dart","wing","hauler"], SHIP_GAP=6;
+  let rot=0, launchWait=2.2;
+  function idleOf(kind){ return ships.find((sh,i)=>i<shipCap && !sh.alive && sh.kind===kind); }
   function update(dt,time){
     starMat.uniforms.uTime.value=time;
-    if(!reduce){ sky.rotation.y+=dt*.006; sky.rotation.z+=dt*.0015; }
+    if(!reduce){ sky.rotation.y+=dt*.006; sky.rotation.z+=dt*.0015;
+      launchWait-=dt;
+      if(launchWait<=0){ const sh=idleOf(ROTATION[rot%3]); if(sh){ launch(sh); rot++; launchWait=SHIP_GAP; } }
+    }
     ships.forEach((sh,i)=>{
-      if(!sh.alive){ if(reduce||i>=shipCap) return; sh.wait-=dt; if(sh.wait<=0) launch(sh); return; }
+      if(!sh.alive) return;
       if(i>=shipCap){ sh.alive=false; sh.root.visible=false; sh.trail.visible=false; return; }
       sh.t+=dt; sh.root.position.addScaledVector(sh.vel,dt);
       const blink=(Math.sin(sh.t*6)>.6)?1:.15; sh.nav.forEach(l=>l.material.opacity=blink*.8);
@@ -1268,7 +1272,7 @@ const space=(function(){
       for(let i=0;i<TRAIL;i++){ const p=sh.hist[Math.min(i,sh.hist.length-1)]; sh.tp[i*3]=p.x; sh.tp[i*3+1]=p.y; sh.tp[i*3+2]=p.z;
         const f=Math.pow(1-i/TRAIL,2)*.8; sh.tc[i*3]=sh.col.r*f; sh.tc[i*3+1]=sh.col.g*f; sh.tc[i*3+2]=sh.col.b*f; }
       sh.trail.geometry.attributes.position.needsUpdate=true; sh.trail.geometry.attributes.color.needsUpdate=true;
-      if(sh.t>sh.dur){ sh.alive=false; sh.root.visible=false; sh.trail.visible=false; sh.wait=1.2+Math.random()*3.2; }
+      if(sh.t>sh.dur){ sh.alive=false; sh.root.visible=false; sh.trail.visible=false; }
     });
     framei++;
     if(framei%frameSkip===0) r.render(sc,cam);
