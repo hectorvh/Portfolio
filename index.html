@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head><body>
 <title>Hector Valdes Portfolio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -759,7 +763,7 @@ function onSection(){
   if(window.__labels) window.__labels.refresh();
   portraitGen++;
 }
-/* About Me or Contact, selected but closed: icons yield to the portrait, then return. Whole pass is 9s. */
+/* About Me or Contact, selected but closed: icons yield to the portrait, then return. Whole pass is 5.4s (40% quicker than the 9s rhythm). */
 let portraitGen=1, portraitT=-1, portraitRun=0, portraitPx=43;
 function fitPortrait(){
   const links=$("links"), box=links.getBoundingClientRect(), gap=14;
@@ -803,13 +807,14 @@ function syncPortrait(dt){
   if(portraitT<0){ links.classList.remove("busy"); set(0,0,0,100); return; }
   portraitT+=dt;
   const ramp=(a,b)=>clamp((portraitT-a)/(b-a),0,1), sm=t=>t*t*(3-2*t);
-  const iHide=sm(ramp(0,1.94)), pShow=sm(ramp(1.35,3.6)), pHide=sm(ramp(5.85,7.51)), iShow=sm(ramp(7.06,9));
-  const returning=portraitT>=7.06;
+  const k=0.6; /* 40% quicker than the 9s pass */
+  const iHide=sm(ramp(0,1.94*k)), pShow=sm(ramp(1.35*k,3.6*k)), pHide=sm(ramp(5.85*k,7.51*k)), iShow=sm(ramp(7.06*k,9*k));
+  const returning=portraitT>=7.06*k;
   const iR=returning?0:iHide*100, iL=returning?(1-iShow)*100:0;
   const pL=pHide>0?0:(1-pShow)*100, pR=pHide*100;
   set(iR.toFixed(1), iL.toFixed(1), pR.toFixed(1), pL.toFixed(1));
-  links.classList.toggle("busy", portraitT<9);
-  if(portraitT>=9) portraitT=-1;
+  links.classList.toggle("busy", portraitT<9*k);
+  if(portraitT>=9*k) portraitT=-1;
 }
 function openDossier(){
   const d=$("dossier");
