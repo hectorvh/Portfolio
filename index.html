@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico?v=2" sizes="48x48">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
 </head><body>
 <title>Hector Valdes Portfolio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -511,6 +511,11 @@ const PROJECTS = [
    d:"Ground-penetrating radar pipeline on simulated (gprMax) and open real B-scans.",
    b:["Standard preprocessing in Python: time-zero correction, dewow, background removal, band-pass filtering, gain.","YOLO hyperbola detector, comparing performance with and without synthetic pre-training."],
    c:["Python","gprMax","YOLO","Signal processing"], link:"https://github.com/hectorvh/GPRadar"},
+  {t:"Gamified Spatial-Language Research Instrument", m:"Research project · SCALA", s:"In progress", model:"hero",
+   d:"Game-based data-collection instrument for the SCALA doctoral network, studying how people across languages and age groups describe spatial relations.",
+   b:["Unity WebGL runner (Astro Bunny) presenting static and dynamic 3D spatial stimuli (containment, support, orbit, traverse) with forced-choice answers, separate trial and assessment modes, and declarative JSON-defined trials.", "React + TypeScript web shell (Jerboa's Journey) handling multilingual onboarding, consent recording and a Supabase/PostgreSQL schema that logs responses by spatial category, designed for older adults (accessibility, no visible timers, rewards decoupled from correctness)."],
+   c:["Unity","C#","WebGL","Supabase","PostgreSQL","HCI"],
+   l:"https://astrobunnygame.netlify.app/"},
   {t:"Crop Pest Detection from Drone & Mobile Imagery", m:"Intel Acelerando México con IA", s:"2nd place · 2026", model:"field",
    d:"Computer-vision system detecting fall armyworm risk in maize from drone and smartphone images.",
    b:["Pretrained detection models in a mobile inference pipeline: preprocessing, thresholding and on-device deployment.","Model output fused with satellite data and geospatial analytics to locate field-level risk hotspots."],
