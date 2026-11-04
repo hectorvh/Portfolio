@@ -1318,16 +1318,20 @@ const BUILD={
     g.add(mesh(new THREE.CylinderGeometry(.07,.07,.12,32),hullD,0,-.41,.3));
     g.add(mesh(new THREE.CylinderGeometry(.073,.073,.014,32),copper,0,-.37,.3));
     g.add(mesh(roundedBoxGeo(.05,.2,.08,.02),hullD,-.17,-.54,.3)); g.add(mesh(roundedBoxGeo(.2,.05,.08,.02),hullD,-.08,-.46,.3));
-    const cam=new THREE.Group(); cam.position.set(0,-.62,.32); cam.rotation.x=.15; g.add(cam);
-    cam.add(mesh(new THREE.CylinderGeometry(.14,.14,.26,40),hullD,0,0,0,0,0,Math.PI/2));
-    [-1,1].forEach(sx=>{ cam.add(mesh(new THREE.CylinderGeometry(.1,.1,.06,32),steel,sx*.16,0,0,0,0,Math.PI/2)); cam.add(mesh(new THREE.CylinderGeometry(.06,.06,.01,24),hullD,sx*.193,0,0,0,0,Math.PI/2)); });
-    cam.add(mesh(new THREE.CylinderGeometry(.1,.11,.09,40),hullD,0,0,.14,Math.PI/2));
-    cam.add(mesh(new THREE.CylinderGeometry(.085,.085,.012,40),glass,0,0,.188,Math.PI/2));
-    cam.add(mesh(new THREE.TorusGeometry(.09,.007,8,40),emissiveM(0x00e5ff,1.0),0,0,.192));
-    cam.add(mesh(new THREE.CylinderGeometry(.012,.012,.01,12),emissiveM(0xff3030,.9),.08,.1,.1,Math.PI/2));
-    /* IR laser scanner: a sweeping light fan from the lens, a bright scan line where it lands, and a fading trail of hits */
-    const laser=new THREE.Group(); laser.position.set(0,-.62,.52); laser.userData.noSample=true; g.add(laser);
-    const L=2.2, Wd=1.1, fan=new THREE.BufferGeometry();
+    const cam=new THREE.Group(); cam.position.set(0,-.62,.32); g.add(cam);
+    const L=2.2, Wd=1.1, lensZ=.19;
+    const beamPitch=Math.atan2(L,.55);
+    const body=new THREE.Group(); body.rotation.x=beamPitch; cam.add(body);
+    body.add(mesh(new THREE.CylinderGeometry(.14,.14,.26,40),hullD,0,0,0,0,0,Math.PI/2));
+    [-1,1].forEach(sx=>{ body.add(mesh(new THREE.CylinderGeometry(.1,.1,.06,32),steel,sx*.16,0,0,0,0,Math.PI/2)); body.add(mesh(new THREE.CylinderGeometry(.06,.06,.01,24),hullD,sx*.193,0,0,0,0,Math.PI/2)); });
+    body.add(mesh(new THREE.CylinderGeometry(.1,.11,.09,40),hullD,0,0,.14,Math.PI/2));
+    body.add(mesh(new THREE.CylinderGeometry(.085,.085,.012,40),glass,0,0,.188,Math.PI/2));
+    body.add(mesh(new THREE.TorusGeometry(.09,.007,8,40),emissiveM(0x00e5ff,1.0),0,0,.192));
+    body.add(mesh(new THREE.CylinderGeometry(.012,.012,.01,12),emissiveM(0xff3030,.9),.08,.1,.1,Math.PI/2));
+    /* lens +Z is the beam center, so the glass stays perpendicular to the laser */
+    const laser=new THREE.Group(); laser.userData.noSample=true;
+    laser.position.set(0,-Math.sin(beamPitch)*lensZ,Math.cos(beamPitch)*lensZ); cam.add(laser);
+    const fan=new THREE.BufferGeometry();
     fan.setAttribute("position",new THREE.Float32BufferAttribute([0,0,0, -Wd,-L,.55, Wd,-L,.55],3));
     fan.setAttribute("color",new THREE.Float32BufferAttribute([1,.1,.08, .5,0,.02, .5,0,.02],3));
     const fanM=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.35,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false});
@@ -1340,11 +1344,13 @@ const BUILD={
     const trail=[]; for(let k=0;k<10;k++){ const m=new THREE.Mesh(new THREE.BoxGeometry(Wd*2,.006,.03),new THREE.MeshBasicMaterial({color:0xff2a3a,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false})); m.userData.noSample=true; g.add(m); trail.push(m); }
     let lastK=-1;
     g.userData.tick=(t,on)=>{
-      const sw=Math.sin(t*1.4)*.42; laser.rotation.x=sw; laser.rotation.z=Math.sin(t*.7)*.05;
+      const sw=Math.sin(t*1.4)*.42, roll=Math.sin(t*.7)*.05;
+      cam.rotation.x=sw; cam.rotation.z=roll;
       fanM.opacity=on?.28+.08*Math.sin(t*17):0; beamM.opacity=on?.9:0; dot.visible=on; lineMesh.visible=on;
-      const ap=new THREE.Vector3(0,-L,.55).applyEuler(laser.rotation).add(laser.position); dot.position.set(0,0,0);
+      cam.updateMatrixWorld(true);
+      const ap=new THREE.Vector3(0,-L,.55); laser.localToWorld(ap); g.worldToLocal(ap); dot.position.set(0,0,0);
       const k=Math.floor(t*6)%trail.length;
-      if(k!==lastK){ lastK=k; trail[k].position.copy(ap); trail[k].rotation.set(0,laser.rotation.z,0); trail[k].material.opacity=on?.7:0; }
+      if(k!==lastK){ lastK=k; trail[k].position.copy(ap); trail[k].rotation.set(0,roll,0); trail[k].material.opacity=on?.7:0; }
       trail.forEach(m=>m.material.opacity*=.93);
     };
     return g;
