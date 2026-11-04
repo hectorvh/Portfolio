@@ -321,6 +321,7 @@ body.pulse .dhead h2{text-shadow:2px 0 rgba(255,60,40,.7),-2px 0 rgba(0,229,255,
   #links a{width:40px;height:40px}
   .contact-portrait{width:min(168px,62%)}
   #links svg{width:20px;height:20px}
+  #tagTri .tag{font-size:10px}
   #ident h1{font-size:22px;margin:6px 0 4px}
   #ident p{font-size:12.5px}
   #ident .long{display:none}
@@ -447,7 +448,7 @@ body.pulse .dhead h2{text-shadow:2px 0 rgba(255,60,40,.7),-2px 0 rgba(0,229,255,
       <span id="fps">— FPS</span>
       <span class="fps-extra" id="ms">— ms</span>
       <span class="fps-extra" id="mem">MEM —</span>
-      <button type="button" id="sfx" aria-pressed="true">SFX ON</button>
+      <button type="button" id="sfx" aria-pressed="true">AUDIO ON</button>
     </div>
   </div>
 
@@ -602,7 +603,7 @@ function latch(strong){
 }
 $("sfx").addEventListener("click",()=>{
   ensureAudio(); sfxOn=!sfxOn; if(actx&&actx.state==="suspended") actx.resume();
-  $("sfx").setAttribute("aria-pressed",sfxOn); $("sfx").textContent= sfxOn?"SFX ON":"SFX OFF"; latch(true);
+  $("sfx").setAttribute("aria-pressed",sfxOn); $("sfx").textContent= sfxOn?"AUDIO ON":"AUDIO OFF"; latch(true);
 });
 
 function pulse(){
@@ -758,7 +759,7 @@ function onSection(){
   if(window.__labels) window.__labels.refresh();
   portraitGen++;
 }
-/* About Me, selected but closed: icons yield to the portrait, then return. Whole pass is ~3s. */
+/* About Me or Contact, selected but closed: icons yield to the portrait, then return. Whole pass is 9s. */
 let portraitGen=1, portraitT=-1, portraitRun=0, portraitPx=43;
 function fitPortrait(){
   const links=$("links"), box=links.getBoundingClientRect(), gap=14;
@@ -786,7 +787,8 @@ function fitPortrait(){
 function syncPortrait(dt){
   const links=$("links");
   const frame=links.querySelector(".portrait-frame");
-  const show=SECTIONS[secIdx].id==="about" && !$("dossier").classList.contains("open") && !reduce;
+  const portraitSec=SECTIONS[secIdx].id==="about"||SECTIONS[secIdx].id==="contact";
+  const show=portraitSec && !$("dossier").classList.contains("open") && !reduce;
   if(show&&frame){
     portraitPx+=(fitPortrait()-portraitPx)*Math.min(1, dt*8);
     frame.style.width=frame.style.height=portraitPx.toFixed(1)+"px";
@@ -795,19 +797,19 @@ function syncPortrait(dt){
   if(show && portraitRun!==portraitGen){ portraitRun=portraitGen; portraitT=0; }
   if(!show){
     portraitT=-1; links.classList.remove("busy"); set(0,0,0,100);
-    if($("dossier").classList.contains("open") && SECTIONS[secIdx].id==="about") portraitRun=-1;
+    if($("dossier").classList.contains("open") && portraitSec) portraitRun=-1;
     return;
   }
   if(portraitT<0){ links.classList.remove("busy"); set(0,0,0,100); return; }
   portraitT+=dt;
   const ramp=(a,b)=>clamp((portraitT-a)/(b-a),0,1), sm=t=>t*t*(3-2*t);
-  const iHide=sm(ramp(0,.65)), pShow=sm(ramp(.45,1.2)), pHide=sm(ramp(1.95,2.5)), iShow=sm(ramp(2.35,3));
-  const returning=portraitT>=2.35;
+  const iHide=sm(ramp(0,1.94)), pShow=sm(ramp(1.35,3.6)), pHide=sm(ramp(5.85,7.51)), iShow=sm(ramp(7.06,9));
+  const returning=portraitT>=7.06;
   const iR=returning?0:iHide*100, iL=returning?(1-iShow)*100:0;
   const pL=pHide>0?0:(1-pShow)*100, pR=pHide*100;
   set(iR.toFixed(1), iL.toFixed(1), pR.toFixed(1), pL.toFixed(1));
-  links.classList.toggle("busy", portraitT<3);
-  if(portraitT>=3) portraitT=-1;
+  links.classList.toggle("busy", portraitT<9);
+  if(portraitT>=9) portraitT=-1;
 }
 function openDossier(){
   const d=$("dossier");
@@ -2278,7 +2280,7 @@ function updateTelemetry(dt){
 
 /* projected HUD tags */
 const anchors={
-  tri:{el:$("tagTri"),p:new THREE.Vector3(-2.6,2.0,-.2),dx:-160,dy:-10,desk:true},
+  tri:{el:$("tagTri"),p:new THREE.Vector3(-2.6,2.0,-.2),dx:-160,dy:-10,desk:false},
   sel:{el:$("tagSel"),p:new THREE.Vector3(1.9,2.55,-.4),dx:0,dy:-40,desk:false}
 };
 const tmpV=new THREE.Vector3();
@@ -2288,6 +2290,12 @@ function placeTags(){
     const a=anchors[k];
     if(narrow&&a.desk){ a.el.style.display="none"; continue; }
     a.el.style.display="";
+    if(narrow&&k==="tri"){
+      const margin=$("ident").getBoundingClientRect().left;
+      const top=$("ident").getBoundingClientRect().bottom+12;
+      a.el.style.transform=`translate(${margin}px,${top.toFixed(1)}px)`;
+      continue;
+    }
     if(narrow&&k==="sel"){
       const w=a.el.offsetWidth||160, h=a.el.offsetHeight||64;
       const margin=8;
@@ -2375,7 +2383,7 @@ renderPrompts();
 renderDossier();
 updateSelectionHUD();
 recon.load(SECTIONS[secIdx].model||PROJECTS[projIdx].model, SECTIONS[secIdx].model?SECTIONS[secIdx].name:PROJECTS[projIdx].t);
-requestAnimationFrame(t=>{ last=t; frame(t); setTimeout(()=>$("boot").classList.add("gone"),150); });
+requestAnimationFrame(t=>{ last=t; frame(t); setTimeout(()=>$("boot").classList.add("gone"), Math.max(0, 2000-performance.now())); });
 })();
 </script>
 
