@@ -506,16 +506,15 @@ const PROJECTS = [
   {t:"3D Perspective Taking in Multi-Drone Navigation", m:"M.Sc. thesis", s:"In progress", model:"hero",
    d:"Unity-based 3D emergency-response simulation converting spoken instructions into constrained multi-drone missions.",
    b:["Uses an LLM to select and configure classical planners, visualizing the outcome in an interactive 3D preview featuring operational areas, boundaries, drone viewpoints, and coverage.", "Visual cues for obstacle awareness, shared situational awareness and perspective taking: teammates' viewpoints, return-to-previous-viewpoint."],
-   c:["Unity","C#","Netcode","Digital twin","HCI","UAV"]},
+   c:["Unity","C#","Digital twin","HCI","UAV"]},
   {t:"GPR Processing & Hyperbola Detection", m:"Prototype", s:"In progress", model:"radargram",
    d:"Ground-penetrating radar pipeline on simulated (gprMax) and open real B-scans.",
    b:["Standard preprocessing in Python: time-zero correction, dewow, background removal, band-pass filtering, gain.","YOLO hyperbola detector, comparing performance with and without synthetic pre-training."],
-   c:["Python","gprMax","YOLO","Signal processing"], link:"https://github.com/hectorvh/GPRadar"},
+   c:["Python","gprMax","YOLO"], link:"https://github.com/hectorvh/GPRadar"},
   {t:"Gamified Spatial-Language Research Instrument", m:"Research project · SCALA", s:"In progress", model:"hero",
    d:"Game-based data-collection instrument for the SCALA doctoral network, studying how people across languages and age groups describe spatial relations.",
-   b:["Unity WebGL runner (Astro Bunny) presenting static and dynamic 3D spatial stimuli (containment, support, orbit, traverse) with forced-choice answers, separate trial and assessment modes, and declarative JSON-defined trials.", "React + TypeScript web shell (Jerboa's Journey) handling multilingual onboarding, consent recording and a Supabase/PostgreSQL schema that logs responses by spatial category, designed for older adults (accessibility, no visible timers, rewards decoupled from correctness)."],
-   c:["Unity","C#","WebGL","Supabase","PostgreSQL","HCI"],
-   l:"https://astrobunnygame.netlify.app/"},
+   b:["Unity WebGL runner (Astro Bunny) presenting static and dynamic 3D spatial stimuli (containment, support, orbit, traverse) with forced-choice answers, separate trial and assessment modes, and declarative JSON-defined trials."],
+   c:["Unity","C#","WebGL","PostgreSQL","HCI"], link:"https://astrobunnygame.netlify.app/", linkLabel:"Play game"},
   {t:"Crop Pest Detection from Drone & Mobile Imagery", m:"Intel Acelerando México con IA", s:"2nd place · 2026", model:"field",
    d:"Computer-vision system detecting fall armyworm risk in maize from drone and smartphone images.",
    b:["Pretrained detection models in a mobile inference pipeline: preprocessing, thresholding and on-device deployment.","Model output fused with satellite data and geospatial analytics to locate field-level risk hotspots."],
@@ -633,7 +632,7 @@ function renderProjects(){
       <span class="idx">P${String(i+1).padStart(2,"0")}</span>
       <span class="t">${p.t}</span>
       <span class="m">${p.m} · <b>${p.s}</b></span>
-      <div class="d">${p.d}${p.b.length?`<ul>${p.b.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}${chips(p.c)}${p.link?`<div class="chips"><a class="chip" href="${p.link}" target="_blank" rel="noopener">Code on GitHub ↗</a></div>`:""}</div>
+      <div class="d">${p.d}${p.b.length?`<ul>${p.b.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}${chips(p.c)}${p.link?`<div class="chips"><a class="chip" href="${p.link}" target="_blank" rel="noopener">${p.linkLabel||"Code on GitHub"} ↗</a></div>`:""}</div>
     </button>`).join("") + `</div>`;
 }
 function renderAbout(){
