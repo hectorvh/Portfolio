@@ -767,8 +767,8 @@ function onSection(){
   if(window.__labels) window.__labels.refresh();
   portraitGen++;
 }
-/* About Me or Contact, selected but closed: icons yield to the portrait, then return. A pass that has started runs to the end even if another section is selected. Whole pass is 5.4s (40% quicker than the 9s rhythm). */
-let portraitGen=1, portraitT=-1, portraitRun=0, portraitPx=43;
+/* About Me or Contact, selected but closed: icons yield to the portrait, then return. A pass that has started runs to the end even if another section is selected. Another pass cannot start until 40s after the previous trigger. Whole pass is 5.4s (40% quicker than the 9s rhythm). */
+let portraitGen=1, portraitT=-1, portraitRun=0, portraitPx=43, portraitReadyAt=0;
 function fitPortrait(){
   const links=$("links"), box=links.getBoundingClientRect(), gap=14;
   const right=box.right, top=box.top;
@@ -799,7 +799,10 @@ function syncPortrait(dt){
   const dossierOpen=$("dossier").classList.contains("open");
   const show=portraitSec && !dossierOpen && !reduce;
   const set=(iR,iL,pR,pL)=>{ links.style.setProperty("--iR",iR+"%"); links.style.setProperty("--iL",iL+"%"); links.style.setProperty("--pR",pR+"%"); links.style.setProperty("--pL",pL+"%"); };
-  if(show && portraitT<0 && portraitRun!==portraitGen){ portraitRun=portraitGen; portraitT=0; }
+  if(show && portraitT<0 && portraitRun!==portraitGen){
+    portraitRun=portraitGen;
+    if(performance.now()>=portraitReadyAt){ portraitT=0; portraitReadyAt=performance.now()+20000; }
+  }
   const playing=portraitT>=0;
   if((show||playing)&&frame){
     portraitPx+=(fitPortrait()-portraitPx)*Math.min(1, dt*8);
