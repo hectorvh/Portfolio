@@ -388,7 +388,7 @@ body.pulse .dhead h2{text-shadow:2px 0 rgba(255,60,40,.7),-2px 0 rgba(0,229,255,
   <nav class="sr-nav" aria-label="Sections" id="srnav"></nav>
 
   <nav id="links" aria-label="Contact links">
-    <a class="mail" href="mailto:valdes.h.hector@gmail.com" data-tip="valdes.h.hector@gmail.com" aria-label="Email valdes.h.hector@gmail.com"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3.5 6l8.5 7 8.5-7"/></svg></a>
+    <a class="mail" href="mailto:contact@hectorvh.com" data-tip="contact@hectorvh.com" aria-label="Email contact@hectorvh.com"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3.5 6l8.5 7 8.5-7"/></svg></a>
     <a href="https://github.com/hectorvh" target="_blank" rel="noopener" data-tip="GitHub · hectorvh" aria-label="GitHub profile hectorvh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.58.24 2.75.12 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.39-5.26 5.67.41.36.78 1.06.78 2.14 0 1.55-.01 2.8-.01 3.18 0 .3.21.66.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg></a>
     <a href="https://www.linkedin.com/in/hector-valdes" target="_blank" rel="noopener" data-tip="LinkedIn · /hector-valdes" aria-label="LinkedIn profile hector-valdes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45C23.2 24 24 23.23 24 22.27V1.73C24 .77 23.2 0 22.23 0z"/></svg></a>
     <span class="portrait-frame" aria-hidden="true"><span class="portrait-mark"><svg class="portrait-rings" viewBox="0 0 300 300"><circle class="ring ring-outer" cx="150" cy="150" r="138" pathLength="100" stroke-dasharray="26 5 14 8 20 6 9 12"/><circle class="ring ring-amber" cx="150" cy="150" r="126" pathLength="100" stroke-dasharray="7 43"/></svg><img class="portrait" src="me.jpg" alt=""></span></span>
@@ -510,7 +510,8 @@ const PROJECTS = [
   {t:"GPR Processing & Hyperbola Detection", m:"Prototype", s:"In progress", model:"radargram",
    d:"Ground-penetrating radar pipeline on simulated (gprMax) and open real B-scans.",
    b:["Standard preprocessing in Python: time-zero correction, dewow, background removal, band-pass filtering, gain.","YOLO hyperbola detector, comparing performance with and without synthetic pre-training."],
-   c:["Python","gprMax","YOLO"], link:"https://github.com/hectorvh/GPRadar"},
+   c:["Python","gprMax","YOLO"], link:"https://github.com/hectorvh/GPRadar",
+   links:[{label:"Results",href:"https://hectorvh.github.io/GPRadar/"},{label:"Interface",href:"https://hectorvh.github.io/GPRadar-UI/"}]},
   {t:"Gamified Spatial-Language Research Instrument", m:"Research project · SCALA", s:"In progress", model:"hero",
    d:"Game-based data-collection instrument for the SCALA doctoral network, studying how people across languages and age groups describe spatial relations.",
    b:["Unity WebGL runner (Astro Bunny) presenting static and dynamic 3D spatial stimuli (containment, support, orbit, traverse) with forced-choice answers, separate trial and assessment modes, and declarative JSON-defined trials."],
@@ -522,7 +523,7 @@ const PROJECTS = [
   {t:"HoneyRoute", m:"Huawei Developer Competition LATAM", s:"2nd place · 2025", model:"drone",
    d:"Field app for smallholder beekeepers and cooperatives: photo-based hive health checks, alerts and apiary mapping.",
    b:["Photo-based pest and disease detection, such as Varroa mite risk, with recommendations and action logging.","Apiary mapping now, with floral-resource maps and predictive risk zones planned."],
-   c:["Computer vision","Mobile","Mapping","Beekeeping"]},
+   c:["Computer vision","Mobile","Mapping","Beekeeping"], link:"https://honeyroute.netlify.app/onboarding", linkLabel:"Open app"},
   {t:"Wildfire Early Warning v2", m:"Intel Acelerando México con IA", s:"Top 10 · 2025", model:"ridge",
    d:"Follow-up to the 2024 hackathon prototype, with upgraded hardware and more data sources feeding the drone-based risk alerts.",
    b:["Improved drone hardware and onboard sensing for field capture.","Extra data sources merged into the vision-model pipeline and the real-time alert dashboard."],
@@ -625,6 +626,13 @@ function pulse(){
    DOSSIER RENDERING
    ========================================================= */
 const chips = arr => `<div class="chips">${arr.map(c=>`<span class="chip">${c}</span>`).join("")}</div>`;
+const projectLinks = p => {
+  const items=[];
+  if(p.link) items.push({href:p.link, label:p.linkLabel||"Code on GitHub"});
+  (p.links||[]).forEach(l=>items.push(l));
+  if(!items.length) return "";
+  return `<div class="chips">${items.map(l=>`<a class="chip" href="${l.href}" target="_blank" rel="noopener">${l.label} ↗</a>`).join("")}</div>`;
+};
 
 function renderProjects(){
   return `<h4>Index · ${PROJECTS.length} entries</h4><div class="plist">` + PROJECTS.map((p,i)=>`
@@ -632,7 +640,7 @@ function renderProjects(){
       <span class="idx">P${String(i+1).padStart(2,"0")}</span>
       <span class="t">${p.t}</span>
       <span class="m">${p.m} · <b>${p.s}</b></span>
-      <div class="d">${p.d}${p.b.length?`<ul>${p.b.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}${chips(p.c)}${p.link?`<div class="chips"><a class="chip" href="${p.link}" target="_blank" rel="noopener">${p.linkLabel||"Code on GitHub"} ↗</a></div>`:""}</div>
+      <div class="d">${p.d}${p.b.length?`<ul>${p.b.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}${chips(p.c)}${projectLinks(p)}</div>
     </button>`).join("") + `</div>`;
 }
 function renderAbout(){
@@ -670,7 +678,7 @@ function renderStack(){
 function renderContact(){
   return `<div class="portrait-mark contact-portrait" role="img" aria-label="Hector Valdes Hurtado"><svg class="portrait-rings" viewBox="0 0 300 300" aria-hidden="true"><circle class="ring ring-outer" cx="150" cy="150" r="138" pathLength="100" stroke-dasharray="26 5 14 8 20 6 9 12"/><circle class="ring ring-amber" cx="150" cy="150" r="126" pathLength="100" stroke-dasharray="7 43"/></svg><img class="portrait" src="me.jpg" alt=""></div>
   <h4>Channels</h4><div class="ch">
-    <div class="row"><span>Email</span><span class="val" id="mail">valdes.h.hector@gmail.com</span><button type="button" class="btn" id="copyMail">Copy</button></div>
+    <div class="row"><span>Email</span><span class="val" id="mail">contact@hectorvh.com</span><button type="button" class="btn" id="copyMail">Copy</button></div>
     <div class="row"><span>GitHub</span><a class="val" href="https://github.com/hectorvh" target="_blank" rel="noopener">hectorvh</a><span></span></div>
     <div class="row"><span>LinkedIn</span><a class="val" href="https://www.linkedin.com/in/hector-valdes" target="_blank" rel="noopener">/hector-valdes</a><span></span></div>
     <div class="row"><span>Base</span><span class="val">Münster, Germany</span><span></span></div>
